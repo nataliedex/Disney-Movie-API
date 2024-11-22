@@ -1,36 +1,40 @@
-const updateButtons = document.querySelectorAll(".update-button");
-const deleteButtons = document.querySelectorAll(".delete-button");
-
-updateButtons.forEach(button => {
+document.querySelectorAll(".update-button").forEach((button) => {
     button.addEventListener("click", () => {
-        const title = button.getAttribute("data-title");
-        const year = button.getAttribute("data-year");
-        const likesValue = button.getAttribute("data-likes");
-        const likes = likesValue ? parseInt(likesValue, 10) : 0;
+        const title = button.dataset.title;
+        const year = button.dataset.year;
+        const likes = parseInt(button.dataset.likes || "0", 10) + 1;
 
-        const updatedLikes = likes + 1;
-        
         fetch("/years", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                title: title,
-                year: year,
-                likes: updatedLikes,
-            }),
+            body: JSON.stringify({ title, year, likes }),
         })
-        .then(res => res.json())
-        .then(data => {
-            console.log("successful update:", data);
-            const likesSpan = button.previousElementSibling;
-            likesSpan.textContent = `Likes: ${updatedLikes}`;
-        })
-        .catch(error => {
-            console.log("Error updating movies:", error);
-        });
+            .then(res => {
+                console.log("Resonse Status: ", res.status);
+                if (!res.ok){
+                    console.error("Response error: ", res.status, res.statusText);
+                    return res.text().then((text) => {
+                        console.error("Error details: ", text);
+                        throw new Error(`Error: ${res.status} - ${res.statusText}`);
+                    });
+                } 
+                return res.json();
+            })
+            .then((data) => {
+                console.log("Server response data: ", data);
+
+                const likesElement = button.closest(".movie-container").querySelector("span");
+                if (likesElement) {
+                    likesElement.textContent = `Likes: ${updatedLikes}`;
+                }
+                button.setAttribute("data-likes", updatedLikes);
+            })
+            .catch((error) => console.error("Update error:", error));
     });
 });
-deleteButtons.forEach(button => {
+
+
+document.querySelectorAll(".delete-button").forEach(button => {
     button.addEventListener("click", () => {
         const movieItem = button.parentElement;
         const title = movieItem.getAttribute("data-title");

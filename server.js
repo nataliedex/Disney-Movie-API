@@ -8,6 +8,7 @@ const port = 3000;
 
 const connectionString = config.mongoUri;
 
+app.use(express.json()); 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 
@@ -48,28 +49,54 @@ MongoClient.connect(connectionString)
                 })
         });
 
+        // app.put("/years", (req, res) => {
+        //     const { title, year, likes } = req.body;
+        //     console.log("Received PUT request:", { title, year, likes });
+        //     movieYears.findOneAndUpdate(
+        //         {title: title, year: year },
+        //         { $set: { likes: likes }},
+        //         { returnDocument: "after"}
+        //     )
+        //     .then(result => {
+        //         res.json(result.value);
+            
+        //     })
+        //     .catch(error => {
+        //         console.error("Error updating movie", error);
+        //         res.status(500).send("Error updating movie");
+        //     });   
+        // });
+
         app.put("/years", (req, res) => {
             const { title, year, likes } = req.body;
-            console.log("Received PUT request:", { title, year, likes });
-            movieYears.findOneAndUpdate(
-                {title: title, year: year },
-                { $set: { likes: likes }},
-                { returnDocument: "after"}
-            )
-            .then(result => {
-                res.json(result.value);
-            })
-            .catch(error => {
-                console.error("Error updating movie", error);
-                res.status(500).send("Error updating movie");
-            });   
+            console.log("Received PUT request: ", {title, year, likes });
+        
+            movieYears
+                .findOneAndUpdate(
+                    { title: title, year: year },
+                    { $set: { likes: likes } },
+                    { returnDocument: "after" }
+                )
+                .then((result) => {
+                    if (!result.value) {
+                        return res.status(404).json({ error: "Movie not found" });
+                    } else {
+                        console.log("Updated document", result.value);
+                        res.json(result.value);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error updating movie:", error);
+                    res.status(500).send("Internal server error");
+                });
         });
+        
 
         app.delete("/years", (req, res) => {
             const { title, year } = req.body;
             movieYears
                 .deleteOne({title: title, year: year})
-                .then(result => {
+                .then(res => {
                     res.json(`Deleted ${title}`)
                 })
                 .catch(error => console.error(error))

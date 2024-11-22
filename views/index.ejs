@@ -19,15 +19,22 @@
 
     <ul>
         <% movies.forEach(movie => { %>
-            <li data-title="<%= movie.title %>" data-year="<%= movie.year %>">
-                <%= movie.title %> - <%= movie.year %>
-                <span id="likes">Likes: <%= movie.likes%> </span>
-                <i class="fas fa-thumbs-up update-button"
-                data-likes="<%= movie.likes %>"></i>
-                <i class="fa fa-trash delete-button"></i>
-            </li>
-       <% }); %>
+            <div class="movie-container">
+                <li>
+                    <%= movie.title %> - <%= movie.year %>
+                    <span>Likes: <%= movie.likes %></span>
+                    <i
+                        class="fas fa-thumbs-up update-button"
+                        data-title="<%= movie.title %>"
+                        data-year="<%= movie.year %>"
+                        data-likes="<%= movie.likes %>"
+                    ></i>
+                    <i class="fa fa-trash delete-button"></i>
+                </li>
+            </div>
+        <% }); %>
     </ul>
+    
     <script src="/main.js"></script>
 </body>
 </html>
