@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disney Movie API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <h1>Disney Movie API</h1>
+    <p>please use localhost:3000/api/disney-movie</p>
+    <p>This is a running list of Disney Movies and their release dates</p>
+
+    <form action="/new-movie" method="POST">
+        <input type="text" placeholder="Movie Title" name="title">
+        <input type="text" placeholder="Movie Release Year" name="year">
+        <button type="submit">Submit</button>
+    </form>
+
+    <ul>
+        <% movies.forEach(movie => { %>
+            <li data-title="<%= movie.title %>" data-year="<%= movie.year %>">
+                <%= movie.title %> - <%= movie.year %>
+                <span id="likes">Likes: <%= movie.likes%> </span>
+                <i class="fas fa-thumbs-up update-button"
+                data-likes="<%= movie.likes %>"></i>
+                <i class="fa fa-trash delete-button"></i>
+            </li>
+       <% }); %>
+    </ul>
+    <script src="/main.js"></script>
+</body>
+</html>
