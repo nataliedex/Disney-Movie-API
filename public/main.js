@@ -9,7 +9,7 @@ document.querySelectorAll(".update-button").forEach((button) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ title, year, likes }),
         })
-            .then(res => {
+            .then((res) => {
                 console.log("Resonse Status: ", res.status);
                 if (!res.ok){
                     console.error("Response error: ", res.status, res.statusText);
@@ -23,7 +23,7 @@ document.querySelectorAll(".update-button").forEach((button) => {
             .then((data) => {
                 console.log("Server response data: ", data);
 
-                const likesElement = button.closest(".movie-container").querySelector("span");
+                const likesElement = button.parentElement.querySelector("span");
                 if (likesElement) {
                     likesElement.textContent = `Likes: ${updatedLikes}`;
                 }

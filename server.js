@@ -8,11 +8,10 @@ const port = 3000;
 
 const connectionString = config.mongoUri;
 
-app.use(express.json()); 
 app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: true }));
-
 app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); 
 
 MongoClient.connect(connectionString)
     .then((client) => {
@@ -21,9 +20,7 @@ MongoClient.connect(connectionString)
         const movieYears = db.collection("years");
         
         app.get("/", (req, res) => {
-            db.collection("years")
-                .find()
-                .toArray()
+            db.collection("years").find().toArray()
                 .then(results => {
                     res.render("index.ejs", {movies: results});
                 })
@@ -39,8 +36,7 @@ MongoClient.connect(connectionString)
                 year: req.body.year,
                 likes: req.body.likes ? parseInt(req.body.likes): 0,
             }
-            movieYears
-                .insertOne(newMovie)
+            movieYears.insertOne(newMovie)
                 .then(result => {
                     res.redirect("/");
                 })
@@ -48,24 +44,6 @@ MongoClient.connect(connectionString)
                     console.log(error);
                 })
         });
-
-        // app.put("/years", (req, res) => {
-        //     const { title, year, likes } = req.body;
-        //     console.log("Received PUT request:", { title, year, likes });
-        //     movieYears.findOneAndUpdate(
-        //         {title: title, year: year },
-        //         { $set: { likes: likes }},
-        //         { returnDocument: "after"}
-        //     )
-        //     .then(result => {
-        //         res.json(result.value);
-            
-        //     })
-        //     .catch(error => {
-        //         console.error("Error updating movie", error);
-        //         res.status(500).send("Error updating movie");
-        //     });   
-        // });
 
         app.put("/years", (req, res) => {
             const { title, year, likes } = req.body;
@@ -79,6 +57,7 @@ MongoClient.connect(connectionString)
                 )
                 .then((result) => {
                     if (!result.value) {
+                        console.log("Updated document", result.value);
                         return res.status(404).json({ error: "Movie not found" });
                     } else {
                         console.log("Updated document", result.value);
@@ -94,8 +73,7 @@ MongoClient.connect(connectionString)
 
         app.delete("/years", (req, res) => {
             const { title, year } = req.body;
-            movieYears
-                .deleteOne({title: title, year: year})
+            movieYears.deleteOne({title: title, year: year})
                 .then(res => {
                     res.json(`Deleted ${title}`)
                 })
