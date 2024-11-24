@@ -64,7 +64,7 @@ MongoClient.connect(connectionString)
                 }
 
                 console.log("filter for update: ", filter);
-                console.log("update for payload: ", {$set: {likes: Number(req.body.likes) } });
+                console.log("update for payload: ", {$set: {likes: Number(req.body.likes) + 1 } });
         
                 // Step 2: Proceed with the update
                 const updatedResult = await movieYears.findOneAndUpdate(
