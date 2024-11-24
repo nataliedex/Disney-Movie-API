@@ -20,7 +20,7 @@ MongoClient.connect(connectionString)
         const movieYears = db.collection("years");
         
         app.get("/", (req, res) => {
-            db.collection("years").find().toArray()
+            movieYears.find().toArray()
                 .then(results => {
                     res.render("index.ejs", {movies: results});
                 })
@@ -45,29 +45,47 @@ MongoClient.connect(connectionString)
                 })
         });
 
-        app.put("/years", (req, res) => {
-            const { title, year, likes } = req.body;
-            console.log("Received PUT request: ", {title, year, likes });
+        app.put("/years", async (req, res) => {
+            try {
+                const filter = {
+                    title: req.body.title.trim(),
+                    year: req.body.year.trim(),
+                };
         
-            movieYears
-                .findOneAndUpdate(
-                    { title: title, year: year },
-                    { $set: { likes: likes } },
-                    { returnDocument: "after" }
-                )
-                .then((result) => {
-                    if (!result.value) {
-                        console.log("Updated document", result.value);
-                        return res.status(404).json({ error: "Movie not found" });
-                    } else {
-                        console.log("Updated document", result.value);
-                        res.json(result.value);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error updating movie:", error);
-                    res.status(500).send("Internal server error");
-                });
+                console.log("Filter for query:", filter);
+        
+                // Step 1: Check if the document exists
+                const existingMovie = await movieYears.findOne(filter);
+                if (!existingMovie) {
+                    console.error("No matching document found in the database");
+                    return res.status(404).json({ error: "Movie not found" });
+                } else {
+                    console.log("Matching document found:", existingMovie);
+                }
+
+                console.log("filter for update: ", filter);
+                console.log("update for payload: ", {$set: {likes: Number(req.body.likes) } });
+        
+                // Step 2: Proceed with the update
+                const updatedResult = await movieYears.findOneAndUpdate(
+                    filter,                               // Filter to find the document
+                    { $set: { likes: Number(req.body.likes) } }, // Update operation
+                    { returnOriginal: false }           // Return updated document
+                );
+                console.log("updatedResult: ", {updatedResult});
+
+        
+                if (!updatedResult) {
+                    console.error("Update failed, no document returned");
+                    return res.status(404).json({ error: "Movie not found" });
+                }
+        
+                console.log("Updated document:", updatedResult);
+                res.json(updatedResult);
+            } catch (error) {
+                console.error("Error during update operation:", error);
+                res.status(500).json({ error: "An error occurred during the update" });
+            }
         });
         
 

@@ -1,8 +1,10 @@
 document.querySelectorAll(".update-button").forEach((button) => {
     button.addEventListener("click", () => {
+        console.log(button.dataset);
         const title = button.dataset.title;
         const year = button.dataset.year;
         const likes = parseInt(button.dataset.likes || "0", 10) + 1;
+        console.log( { title, year, likes });
 
         fetch("/years", {
             method: "PUT",
@@ -10,6 +12,7 @@ document.querySelectorAll(".update-button").forEach((button) => {
             body: JSON.stringify({ title, year, likes }),
         })
             .then((res) => {
+                console.log("Response object", res);
                 console.log("Resonse Status: ", res.status);
                 if (!res.ok){
                     console.error("Response error: ", res.status, res.statusText);
@@ -23,11 +26,13 @@ document.querySelectorAll(".update-button").forEach((button) => {
             .then((data) => {
                 console.log("Server response data: ", data);
 
-                const likesElement = button.parentElement.querySelector("span");
+                const likesElement = button.closest(".movie-container").querySelector("span");
+                console.log(likesElement);
+                console.log(data.likes);
                 if (likesElement) {
-                    likesElement.textContent = `Likes: ${updatedLikes}`;
+                    likesElement.textContent = `Likes: ${data.likes+1}`;
                 }
-                button.setAttribute("data-likes", updatedLikes);
+                button.setAttribute("data-likes", data.likes);
             })
             .catch((error) => console.error("Update error:", error));
     });
