@@ -51,36 +51,15 @@ MongoClient.connect(connectionString)
                     title: req.body.title.trim(),
                     year: req.body.year.trim(),
                 };
-        
-                console.log("Filter for query:", filter);
-        
-                // Step 1: Check if the document exists
-                const existingMovie = await movieYears.findOne(filter);
-                if (!existingMovie) {
-                    console.error("No matching document found in the database");
-                    return res.status(404).json({ error: "Movie not found" });
-                } else {
-                    console.log("Matching document found:", existingMovie);
-                }
-
-                console.log("filter for update: ", filter);
-                console.log("update for payload: ", {$set: {likes: Number(req.body.likes) + 1 } });
-        
-                // Step 2: Proceed with the update
                 const updatedResult = await movieYears.findOneAndUpdate(
-                    filter,                               // Filter to find the document
-                    { $set: { likes: Number(req.body.likes) } }, // Update operation
-                    { returnOriginal: false }           // Return updated document
+                    filter,                               
+                    { $inc: { likes: 1 } }, 
+                    { returnDocument: "after" }           
                 );
-                console.log("updatedResult: ", {updatedResult});
-
-        
                 if (!updatedResult) {
                     console.error("Update failed, no document returned");
                     return res.status(404).json({ error: "Movie not found" });
                 }
-        
-                console.log("Updated document:", updatedResult);
                 res.json(updatedResult);
             } catch (error) {
                 console.error("Error during update operation:", error);
@@ -88,15 +67,29 @@ MongoClient.connect(connectionString)
             }
         });
         
+        app.delete("/years", async (req, res) => {
+            try{
+                const { title, year } = req.body;
 
-        app.delete("/years", (req, res) => {
-            const { title, year } = req.body;
-            movieYears.deleteOne({title: title, year: year})
-                .then(res => {
-                    res.json(`Deleted ${title}`)
-                })
-                .catch(error => console.error(error))
-        });
+                if(!title || !year) {
+                    console.error("Missing title or year in the request body");
+                    return res.status(400).json( {error: "Title and year are required"});
+                }
+
+                const result = movieYears.deleteOne({ title: title.trim(), year: year.trim() });
+
+                if(result.deletedCount === 0) {
+                    console.error(`No Movie found for title: ${title}, year: ${year}`);
+                    return res.status(404).json({error: "Movie not found"});
+                }
+
+                console.log(`Deleted movie: ${title}, ${year}`);
+                res.json({ message: `Deleted ${title} (${year})` });
+            } catch (error) {
+                console.error("Error while deleting movie: ", error);
+                res.status(500).json({ error: "An error occured while deleting the movie" });
+            }
+        });    
     });
 
 app.listen(port, () => {

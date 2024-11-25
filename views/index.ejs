@@ -29,7 +29,12 @@
                         data-year="<%= movie.year %>"
                         data-likes="<%= movie.likes %>"
                     ></i>
-                    <i class="fa fa-trash delete-button"></i>
+                    <i 
+                        class="fa fa-trash delete-button"
+                        data-title="<%= movie.title %>"
+                        data-year="<%= movie.year %>"
+                        data-likes="<%= movie.likes %>"
+                    ></i>
                 </li>
             </div>
         <% }); %>
